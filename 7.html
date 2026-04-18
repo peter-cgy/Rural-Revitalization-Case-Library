@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>山河共富 | 豫川滇乡村振兴协同实践 - 地理科学平台</title>
+    <!-- Leaflet CSS + JS (OpenStreetMap) -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- 字体与图标库 -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: #fefaf2;
+            color: #2c3e1f;
+            scroll-behavior: smooth;
+        }
+        .hero {
+            background: linear-gradient(125deg, #1e3c1c 0%, #3b6e3a 50%, #5a9e4e 100%);
+            color: white;
+            padding: 2.2rem 1.8rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+        }
+        .hero::before {
+            content: "🌾";
+            font-size: 140px;
+            opacity: 0.08;
+            position: absolute;
+            bottom: -30px;
+            right: 20px;
+            pointer-events: none;
+        }
+        .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem; }
+        .hero p { font-size: 1rem; opacity: 0.9; }
+        .container { max-width: 1400px; margin: 2rem auto; padding: 0 2rem; }
+        .map-section {
+            background: #ffffffdd;
+            border-radius: 32px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.2);
+            overflow: hidden;
+            margin-bottom: 2.8rem;
+            border: 1px solid #e9e0cf;
+        }
+        #map { height: 480px; width: 100%; }
+        .map-caption {
+            padding: 0.8rem 1.5rem;
+            background: #fffcf5;
+            font-size: 0.85rem;
+            color: #5f6e4a;
+            border-top: 1px solid #ece1cf;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        /* 案例卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.8rem;
+            margin: 2.5rem 0;
+        }
+        .card {
+            background: white;
+            border-radius: 28px;
+            overflow: hidden;
+            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #eee3d4;
+            cursor: pointer;
+        }
+        .card:hover { transform: translateY(-6px); box-shadow: 0 25px 35px -12px rgba(0,0,0,0.15); }
+        .card-img { width: 100%; height: 180px; object-fit: cover; background: #e9e0cf; pointer-events: none; }
+        .card-content { padding: 1.4rem 1.3rem 1.5rem; pointer-events: none; }
+        .card h3 { color: #2b5c1e; font-size: 1.3rem; margin-bottom: 0.5rem; display: flex; flex-wrap: wrap; gap: 8px; }
+        .geo-tag { font-family: monospace; font-size: 0.7rem; background: #eff3e6; padding: 0.2rem 0.7rem; border-radius: 40px; color: #5b7242; }
+        .stat-number { font-size: 1.8rem; font-weight: 800; color: #2f6b2a; margin: 0.6rem 0 0.3rem; }
+        .law { font-size: 0.85rem; background: #f9f6ef; border-radius: 24px; padding: 0.6rem; margin-top: 0.9rem; border-left: 4px solid #87b16a; }
+        /* 照片墙 */
+        .gallery-section {
+            background: #fef8ef;
+            border-radius: 36px;
+            padding: 2rem 1.5rem;
+            margin: 2.5rem 0;
+            border: 1px solid #e6dac8;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        }
+        .gallery-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c5e2a;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.2rem;
+        }
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: #f0e7da;
+            aspect-ratio: 1 / 0.8;
+        }
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+        .gallery-item:hover img { transform: scale(1.03); }
+        /* 轻量级 lightbox（带描述） */
+        .lightbox {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            flex-direction: column;
+        }
+        .lightbox img {
+            max-width: 80%;
+            max-height: 70%;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+        .lightbox-caption {
+            margin-top: 20px;
+            color: white;
+            background: rgba(0,0,0,0.6);
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 1rem;
+            text-align: center;
+            max-width: 80%;
+        }
+        .promo-section {
+            background: linear-gradient(115deg, #f8f3e6 0%, #fff8ed 100%);
+            border-radius: 36px;
+            padding: 2rem 1.8rem;
+            margin: 2.5rem 0;
+            border: 1px solid #dfd4be;
+        }
+        .promo-title { font-size: 1.8rem; font-weight: 700; color: #2c5e2a; display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem; }
+        .promo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.6rem; }
+        .promo-card { background: white; border-radius: 24px; padding: 1.2rem; border-bottom: 4px solid #9bc17c; }
+        .video-section { background: #1e2a1a; border-radius: 32px; margin: 2.5rem 0; overflow: hidden; box-shadow: 0 15px 25px rgba(0,0,0,0.2); }
+        .video-container video { width: 100%; display: block; max-height: 500px; object-fit: cover; }
+        .video-caption { padding: 1rem 1.5rem; background: #2b3924; color: #e9f0df; display: flex; align-items: center; gap: 12px; }
+        .toolkit { background: #e7efdd; border-radius: 32px; padding: 2rem; margin: 2rem 0; text-align: center; }
+        .btn { display: inline-block; background: #2c6e2f; color: white; padding: 0.7rem 1.8rem; border-radius: 60px; font-weight: 600; margin: 0.5rem; cursor: pointer; border: none; transition: 0.2s; }
+        .btn-outline { background: transparent; border: 2px solid #2c6e2f; color: #2c6e2f; }
+        .btn:hover { background: #1e551f; transform: scale(1.02); }
+        footer { background: #dbd0bc; text-align: center; padding: 1.5rem; font-size: 0.8rem; color: #4d6237; margin-top: 2rem; }
+        /* 模态框通用 */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            backdrop-filter: blur(3px);
+        }
+        .modal-content {
+            background: #fffdf7;
+            margin: 5% auto;
+            padding: 1.5rem;
+            border-radius: 32px;
+            width: 85%;
+            max-width: 950px;
+            max-height: 85%;
+            overflow-y: auto;
+        }
+        .docs-list { display: flex; flex-direction: column; gap: 1rem; }
+        .doc-item { background: #f5f0e6; border-radius: 20px; padding: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .doc-download-btn { background: #2c6e2f; color: white; border: none; padding: 0.4rem 1rem; border-radius: 30px; cursor: pointer; font-weight: 500; }
+        .close-modal { font-size: 1.8rem; cursor: pointer; float: right; }
+        /* 团队介绍模态框样式 */
+        .team-content {
+            text-align: center;
+        }
+        .team-members {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .member {
+            background: #f0f0e0;
+            border-radius: 24px;
+            padding: 0.8rem 1.2rem;
+            min-width: 120px;
+        }
+        .member i {
+            font-size: 2rem;
+            color: #3b6e3a;
+        }
+        .contact-email {
+            background: #e7efdd;
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-family: monospace;
+            margin-top: 1rem;
+        }
+        @media (max-width: 720px) { .container { padding: 0 1rem; } .hero h1 { font-size: 1.8rem; } }
+    </style>
+</head>
+<body>
+<div class="hero">
+    <h1>🌾 山河共富 · 地理协同 <span style="font-size: 1rem;">豫川滇乡村振兴协同实践</span></h1>
+    <p>基于田野调查 | 物质流分析 | 文化区位理论 | OpenStreetMap 空间呈现</p>
+</div>
+
+<div class="container">
+    <!-- Leaflet地图 -->
+    <div class="map-section">
+        <div id="map"></div>
+        <div class="map-caption">
+            <span>📍 四地空间分布：暖温带—亚热带—高原气候区 | 海拔 80m ~ 2000m</span>
+            <span>🗺️ 底图: OpenStreetMap | 投影: WGS84</span>
+        </div>
+    </div>
+
+    <!-- 四个案例卡片（点击下载对应PDF） -->
+    <div class="stats-grid">
+        <div class="card" data-pdf="泌阳县夏南牛—蘑菇生态循环农业优化方案.pdf">
+            <img class="card-img" src="./picture/蘑菇.png" alt="泌阳循环农业" onerror="this.src='https://picsum.photos/id/200/400/200'">
+            <div class="card-content">
+                <h3>🐂 河南泌阳 <span class="geo-tag">32.7°N, 113.3°E</span></h3>
+                <div><strong>夏南牛-蘑菇循环农业</strong></div>
+                <div class="stat-number">粪污资源化率 ↑ 35%→85%</div>
+                <div>户均增收 <strong>1.2万元</strong></div>
+                <div class="law">🌾 规律：合作社主导的物质闭环 + 利益共享机制</div>
+            </div>
+        </div>
+        <div class="card" data-pdf="龙门石窟文化IP乡村转化应用指南.pdf">
+            <img class="card-img" src="./picture/佛像纹样类.png" alt="洛阳龙门石窟" onerror="this.src='https://picsum.photos/id/104/400/200'">
+            <div class="card-content">
+                <h3>🏯 河南洛阳 <span class="geo-tag">34.6°N, 112.4°E</span></h3>
+                <div><strong>龙门石窟文化辐射区</strong>（双村对比）</div>
+                <div class="stat-number">龙门村: 流量驱动 | 西草店村: 品质度假</div>
+                <div class="law">🏛️ 规律：距离衰减决定业态分层</div>
+            </div>
+        </div>
+        <div class="card" data-pdf="觉慧手工挂面生产标准手册.pdf">
+            <img class="card-img" src="./picture/和挂面的合影.png" alt="德阳挂面" onerror="this.src='https://picsum.photos/id/122/400/200'">
+            <div class="card-content">
+                <h3>🍜 四川德阳 <span class="geo-tag">31.0°N, 104.6°E</span></h3>
+                <div><strong>觉慧村手工挂面非遗</strong></div>
+                <div class="stat-number">标准化手册 + 减盐健康产品线</div>
+                <div class="law">📜 规律：标准化×产品创新×品牌传播</div>
+            </div>
+        </div>
+        <div class="card" data-pdf="白莺山古茶树数字档案与茶旅融合方案.pdf">
+            <img class="card-img" src="./picture/二嘎子茶.png" alt="临沧古茶树" onerror="this.src='https://picsum.photos/id/96/400/200'">
+            <div class="card-content">
+                <h3>🍃 云南临沧 <span class="geo-tag">24.5°N, 100.0°E</span></h3>
+                <div><strong>白莺山古茶树基因库</strong></div>
+                <div class="stat-number">数字建档: 11个本土品种, 2800年茶王树</div>
+                <div class="law">🌳 规律：数字身份→资产定价→社区分红</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 照片墙：全部24张照片，点击显示介绍 -->
+    <div class="gallery-section">
+        <div class="gallery-title"><i class="fas fa-camera-retro"></i> 📸 田野影像纪实 · 实践照片墙</div>
+        <div class="gallery-grid" id="photoGallery"></div>
+        <p style="margin-top: 1rem; font-size: 0.8rem; color: #7e6e54; text-align: center;">* 点击任意照片可放大并查看介绍</p>
+    </div>
+
+    <!-- 跨域推广建议 -->
+    <div class="promo-section">
+        <div class="promo-title"><i class="fas fa-chalkboard-user"></i> 规律赋能 · 跨域推广建议</div>
+        <div class="promo-grid">
+            <div class="promo-card"><h4><i class="fas fa-tractor"></i> 上海崇明·奶牛+水稻秸秆协同</h4><p>借鉴泌阳循环模式：将牛粪与水稻秸秆协同处理，生产蘑菇基质，菌糠还田，解决污染与增收。</p></div>
+            <div class="promo-card"><h4><i class="fas fa-umbrella-beach"></i> 乌镇周边·景区流量分层</h4><p>紧邻景区做流量业态，3-5公里外做精品度假、田园康养，避免同质化竞争。</p></div>
+            <div class="promo-card"><h4><i class="fas fa-palette"></i> 上海非遗·顾绣/嘉定竹刻</h4><p>复制德阳标准化路径：梳理工序标准，开发健康化文创，匠人故事短视频传播。</p></div>
+            <div class="promo-card"><h4><i class="fas fa-leaf"></i> 安吉白茶·西湖龙井</h4><p>基于临沧数字建档经验：建立“一树一码”溯源系统，设计研学路线。</p></div>
+        </div>
+    </div>
+
+    <!-- 采访视频 -->
+    <div class="video-section">
+        <div class="video-container">
+            <video controls preload="metadata">
+                <source src="./picture/interview.mp4" type="video/mp4">
+                您的浏览器不支持 video 标签。
+            </video>
+        </div>
+        <div class="video-caption">
+            <i class="fas fa-microphone-alt" style="font-size: 1.4rem;"></i> 
+            <span><strong>田野访谈纪实</strong> — 豫川滇三地农户、合作社带头人、非遗匠人深度采访</span>
+        </div>
+    </div>
+
+    <!-- 工具包按钮 -->
+    <div class="toolkit">
+        <h3><i class="fas fa-box-open"></i> 乡村振兴协同工具包（开放共享）</h3>
+        <p>《泌阳循环农业优化方案》·《龙门IP转化指南》·《觉慧挂面标准手册》·《白莺山古茶树数字档案》</p>
+        <p style="font-size:0.85rem;">🔁 四大普适规律：产业融合 | 文化赋能 | 生态优先 | 人才协同</p>
+        <div>
+            <button id="openToolkitBtn" class="btn"><i class="fas fa-download"></i> 📥 申请工具包</button>
+            <button id="joinNetworkBtn" class="btn btn-outline"><i class="fas fa-handshake"></i> 加入协同网络</button>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <p>基于地理科学田野调查方法 | 物质流分析 | 文化区位理论 | 数据更新至2026.04 | 地图 © OpenStreetMap 贡献者</p>
+    <p>© 山河共富项目组 · 豫川滇乡村振兴协同实践</p>
+</footer>
+
+<!-- 工具包下载列表模态框 -->
+<div id="toolkitModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModalBtn" style="float:right;">&times;</span>
+        <h2>📘 四项核心成果文档（点击即可下载）</h2>
+        <div class="docs-list" id="docsListContainer"></div>
+    </div>
+</div>
+
+<!-- 团队介绍模态框 -->
+<div id="teamModal" class="modal">
+    <div class="modal-content team-content">
+        <span class="close-modal" id="closeTeamModalBtn" style="float:right;">&times;</span>
+        <h2><i class="fas fa-users"></i> 山河共富项目团队</h2>
+        <p style="margin-top: 0.5rem;">华东师范大学 · 地理科学学院 / 乡村振兴联合调研团队</p>
+        <div class="team-members">
+            <div class="member"><i class="fas fa-user-graduate"></i><br>陈国一</div>
+            <div class="member"><i class="fas fa-user-graduate"></i><br>杨听月</div>
+            <div class="member"><i class="fas fa-user-graduate"></i><br>李若莹</div>
+            <div class="member"><i class="fas fa-user-graduate"></i><br>谢嘉鑫</div>
+            <div class="member"><i class="fas fa-user-graduate"></i><br>巩宇洋</div>
+        </div>
+        <p>我们深入豫、川、滇三地开展田野调查，通过跨案例比较研究，提炼出可复制的乡村振兴规律，并形成系列工具包，致力于为全国乡村发展提供科学支撑与实践参考。</p>
+        <div class="contact-email">
+            <i class="fas fa-envelope"></i> 合作联系：10253901414@stu.ecnu.edu.cn
+        </div>
+        <p style="margin-top: 1rem; font-size: 0.8rem;">欢迎地方政府、高校、乡村实践者交流合作！</p>
+    </div>
+</div>
+
+<!-- 照片放大 lightbox（带描述） -->
+<div id="lightbox" class="lightbox" onclick="if(event.target===this) this.style.display='none'">
+    <img id="lightboxImg" src="">
+    <div id="lightboxCaption" class="lightbox-caption"></div>
+</div>
+
+<script>
+    // ==================== 初始化 Leaflet 地图 ====================
+    var map = L.map('map').setView([32.5, 107.5], 5.2);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> & CartoDB',
+        subdomains: 'abcd',
+        maxZoom: 18,
+        minZoom: 4
+    }).addTo(map);
+
+    var sites = [
+        { name: "河南泌阳", lat: 32.723, lng: 113.327, popup: "🐂 夏南牛-蘑菇循环农业<br>粪污资源化率85% | 户均增收1.2万元", color: "#4c8b3c" },
+        { name: "河南洛阳", lat: 34.619, lng: 112.454, popup: "🏯 龙门石窟辐射区<br>双村对比: 流量vs品质 | 文旅主导转型", color: "#b78d4a" },
+        { name: "四川德阳", lat: 31.127, lng: 104.397, popup: "🍜 觉慧村非遗挂面<br>标准化手册+健康产品线 | 品牌影像档案", color: "#d9a13b" },
+        { name: "云南临沧", lat: 23.886, lng: 100.088, popup: "🍃 白莺山古茶树<br>数字建档2800年茶王 | 茶旅融合共管", color: "#5f8b6f" }
+    ];
+    sites.forEach(site => {
+        var marker = L.marker([site.lat, site.lng]).addTo(map);
+        marker.bindPopup(`<b>${site.name}</b><br>${site.popup}`);
+        L.circle([site.lat, site.lng], {
+            color: site.color,
+            weight: 1,
+            fillColor: site.color,
+            fillOpacity: 0.15,
+            radius: 25000
+        }).addTo(map);
+    });
+
+    // ==================== PDF 下载功能 ====================
+    const pdfFiles = {
+        "泌阳县夏南牛—蘑菇生态循环农业优化方案.pdf": "./picture/泌阳县夏南牛—蘑菇生态循环农业优化方案.pdf",
+        "龙门石窟文化IP乡村转化应用指南.pdf": "./picture/龙门石窟文化IP乡村转化应用指南.pdf",
+        "觉慧手工挂面生产标准手册.pdf": "./picture/觉慧手工挂面生产标准手册.pdf",
+        "白莺山古茶树数字档案与茶旅融合方案.pdf": "./picture/白莺山古茶树数字档案与茶旅融合方案.pdf"
+    };
+
+    function downloadPDF(pdfName) {
+        const filePath = pdfFiles[pdfName];
+        if (filePath) {
+            const link = document.createElement('a');
+            link.href = filePath;
+            link.download = pdfName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        } else {
+            alert("文件不存在，请确认PDF已放置在 ./picture/ 目录下，且文件名正确。");
+        }
+    }
+
+    // 卡片点击下载
+    const cards = document.querySelectorAll('.card');
+    cards.forEach(card => {
+        const pdfName = card.getAttribute('data-pdf');
+        if (pdfName) {
+            card.addEventListener('click', (e) => {
+                e.stopPropagation();
+                downloadPDF(pdfName);
+            });
+        }
+    });
+
+    // ==================== 工具包模态框 ====================
+    const modal = document.getElementById('toolkitModal');
+    const openBtn = document.getElementById('openToolkitBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const docsContainer = document.getElementById('docsListContainer');
+
+    function renderDocsList() {
+        docsContainer.innerHTML = '';
+        for (const [pdfName, path] of Object.entries(pdfFiles)) {
+            const div = document.createElement('div');
+            div.className = 'doc-item';
+            let title = pdfName.replace('.pdf', '');
+            div.innerHTML = `
+                <div><strong>📄 ${title}</strong><br><span style="font-size:0.75rem;">点击下方按钮下载PDF</span></div>
+                <button class="doc-download-btn" data-pdf="${pdfName}">📥 下载文档</button>
+            `;
+            docsContainer.appendChild(div);
+        }
+        document.querySelectorAll('.doc-download-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const pdfName = btn.getAttribute('data-pdf');
+                downloadPDF(pdfName);
+            });
+        });
+    }
+
+    openBtn.addEventListener('click', () => {
+        modal.style.display = 'block';
+        renderDocsList();
+    });
+    closeModalBtn.addEventListener('click', () => { modal.style.display = 'none'; });
+    window.addEventListener('click', (e) => {
+        if (e.target === modal) modal.style.display = 'none';
+    });
+
+    // ==================== 团队介绍模态框 ====================
+    const teamModal = document.getElementById('teamModal');
+    const joinBtn = document.getElementById('joinNetworkBtn');
+    const closeTeamModalBtn = document.getElementById('closeTeamModalBtn');
+
+    joinBtn.addEventListener('click', () => {
+        teamModal.style.display = 'block';
+    });
+    closeTeamModalBtn.addEventListener('click', () => {
+        teamModal.style.display = 'none';
+    });
+    window.addEventListener('click', (e) => {
+        if (e.target === teamModal) teamModal.style.display = 'none';
+    });
+
+    // ==================== 照片墙（带描述） ====================
+    // 照片列表及对应的友好描述（根据文件名生成）
+    const photos = [
+        { file: "白芽子茶.png", desc: "白芽子茶 · 新芽乳白，蜜香鲜醇，向阳黄红壤生长" },
+        { file: "本山茶.png", desc: "本山茶 · 香气清高，海拔1800-2000m砂质红壤" },
+        { file: "豆蔻茶.png", desc: "豆蔻茶 · 毫香浓郁，清甜鲜爽，腐殖红壤" },
+        { file: "二嘎子茶.png", desc: "二嘎子茶 · 树龄2800年茶王，滋味浓厚" },
+        { file: "佛像纹样类.png", desc: "佛像纹样类 · 龙门石窟文化IP素材库" },
+        { file: "和挂面的合影.png", desc: "和挂面的合影 · 德阳觉慧村非遗体验" },
+        { file: "河洛文化类.png", desc: "河洛文化类 · 伊河水纹、龙门山形等符号" },
+        { file: "贺庆茶.png", desc: "贺庆茶 · 汤感醇厚，回甘持久" },
+        { file: "黑条子茶.png", desc: "黑条子茶 · 枝条深褐，耐泡度高" },
+        { file: "红芽口茶.png", desc: "红芽口茶 · 新芽鲜红，香气高扬" },
+        { file: "环境效益指标优化前后对比图.png", desc: "环境效益指标对比 · 泌阳循环农业成果" },
+        { file: "柳叶茶.png", desc: "柳叶茶 · 叶片狭长，汤色浅绿" },
+        { file: "勐库种.png", desc: "勐库种 · 花香高扬，甜度高" },
+        { file: "蘑菇.png", desc: "蘑菇 · 泌阳夏南牛-蘑菇循环农业基质" },
+        { file: "亲手制作挂面.png", desc: "亲手制作挂面 · 德阳非遗技艺体验" },
+        { file: "石窟符号类.png", desc: "石窟符号类 · 洞窟轮廓、佛龛造型纹样" },
+        { file: "唐代美学类.png", desc: "唐代美学类 · 唐风卷草纹、宝相花纹" },
+        { file: "藤子茶.png", desc: "藤子茶 · 枝条如藤，野韵独特" },
+        { file: "听合作社的老李讲解香菇的种植环境.png", desc: "听合作社老李讲解香菇种植 · 泌阳产业培训" },
+        { file: "秃房茶.png", desc: "秃房茶 · 野生型，野韵浓郁" },
+        { file: "在夏南牛研究院门前.png", desc: "在夏南牛研究院门前 · 科技支撑循环农业" },
+        { file: "在夏南牛养殖工厂记录夏南牛的饲料和粪便量.png", desc: "养殖工厂记录 · 粪污资源化调研" },
+        { file: "正在工作的钟师傅.png", desc: "正在工作的钟师傅 · 德阳挂面匠人" },
+        { file: "专心制作的罗大姐.png", desc: "专心制作的罗大姐 · 非遗传承人" }
+    ];
+
+    const galleryContainer = document.getElementById('photoGallery');
+    const lightboxDiv = document.getElementById('lightbox');
+    const lightboxImg = document.getElementById('lightboxImg');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+
+    function buildPhotoGallery() {
+        if (!galleryContainer) return;
+        galleryContainer.innerHTML = '';
+        photos.forEach(photo => {
+            const imgPath = `./picture/${encodeURIComponent(photo.file)}`;
+            const item = document.createElement('div');
+            item.className = 'gallery-item';
+            const img = document.createElement('img');
+            img.src = imgPath;
+            img.alt = photo.desc;
+            img.onerror = () => { img.src = 'https://picsum.photos/200/200?random=1'; };
+            img.onclick = (e) => {
+                e.stopPropagation();
+                lightboxImg.src = img.src;
+                lightboxCaption.innerText = photo.desc;
+                lightboxDiv.style.display = 'flex';
+            };
+            item.appendChild(img);
+            galleryContainer.appendChild(item);
+        });
+    }
+    buildPhotoGallery();
+
+    // 点击 lightbox 背景关闭
+    lightboxDiv.addEventListener('click', (e) => {
+        if (e.target === lightboxDiv) lightboxDiv.style.display = 'none';
+    });
+</script>
+</body>
+</html>
