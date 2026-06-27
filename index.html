@@ -2,7 +2,6 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <!-- 强制手机适配，禁止缩放 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>乡衡·RISA 山河共富</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -32,7 +31,6 @@
             overflow-x: hidden;
             padding-bottom: 80px;
         }
-        /* 顶部加载条 */
         .page-progress {
             position: fixed;
             top: 0;
@@ -42,7 +40,6 @@
             width: 0%;
             z-index: 9999;
         }
-        /* 顶部导航 移动端极简 */
         header {
             position: fixed;
             top: 0;
@@ -58,15 +55,13 @@
             color: var(--main-green);
             text-align: center;
         }
-        /* 主内容容器 */
         .wrap {
             margin-top: 70px;
             padding: 0 16px;
         }
-        /* 标题区块 */
         .title-block {
             text-align: center;
-            margin: 30px 0;
+            margin: 30px 0 24px;
         }
         .main-title {
             font-size: 24px;
@@ -77,19 +72,28 @@
             font-size: 14px;
             color: var(--text-gray);
             line-height: 1.6;
+            padding: 0 8px;
         }
-        /* 智能体容器：直接全屏贴合，无多余卡片边框 */
+
+        /* 核心：聊天容器水平百分百居中，左右固定对称边距，绝对居中 */
         .chat-wrap {
             width: 100%;
+            max-width: calc(100% - 32px);
+            margin: 0 auto;
             height: 70vh;
             border-radius: 20px;
             overflow: hidden;
             background: var(--white);
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            /* 水平居中锁定 */
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         #app {
             width: 100%;
             height: 100%;
+            margin: 0 auto;
         }
         .loading-tip {
             height: 100%;
@@ -98,8 +102,8 @@
             justify-content: center;
             color: var(--main-green);
             font-size: 14px;
+            text-align: center;
         }
-        /* 数据统计区块 手机两行布局 */
         .stat-box {
             display: grid;
             grid-template-columns: 1fr 1fr 1fr;
@@ -122,7 +126,6 @@
             font-size: 12px;
             color: var(--text-gray);
         }
-        /* 内容分段区块 */
         .section-block {
             margin: 50px 0;
         }
@@ -137,8 +140,8 @@
             color: var(--text-gray);
             line-height: 1.7;
             text-align: center;
+            padding: 0 10px;
         }
-        /* 回到顶部 */
         .back-top {
             position: fixed;
             right: 16px;
@@ -158,35 +161,37 @@
             opacity: 1;
             visibility: visible;
         }
-        /* 底部版权 */
         footer {
             text-align: center;
             margin-top: 60px;
             font-size: 12px;
             color: var(--text-gray);
         }
+        /* 横竖屏自适应强制居中 */
+        @media (orientation: landscape) {
+            .chat-wrap {
+                height: 60vh;
+                max-width: 600px;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="page-progress" id="pageProgress"></div>
-
     <header>
         <div class="header-title">乡衡·RISA 山河共富</div>
     </header>
-
     <div class="wrap">
         <div class="title-block">
             <h1 class="main-title">公益乡村产业智能决策平台</h1>
             <p class="desc-text">地理实景校准 + 官方政策溯源 · 基层村干部免费专用 · 免登录直接使用</p>
         </div>
-
-        <!-- 智能体主区域，简洁圆角容器，无多余3D倾斜、无冗余装饰 -->
+        <!-- 严格居中聊天容器 -->
         <div class="chat-wrap">
             <div id="app">
                 <div class="loading-tip">智能体加载中，请稍候</div>
             </div>
         </div>
-
         <div class="stat-box">
             <div class="stat-item">
                 <div class="stat-num count" data-target="90">0</div>
@@ -201,28 +206,21 @@
                 <div class="stat-label">落地试点村镇</div>
             </div>
         </div>
-
         <div class="section-block">
             <h3 class="section-h3">项目研发背景</h3>
             <p class="section-p">实地走访河南、金寨、德阳村镇，针对村干部经验规划、专业软件门槛高、惠农政策获取难、老年群体使用不便痛点，自研RISA量化打分系统，配套高德地理核验、政策检索、语音朗读、PDF导出一体化服务。</p>
         </div>
-
         <div class="section-block">
             <h3 class="section-h3">核心创新优势</h3>
             <p class="section-p">地理耦合量化打分 · 政务官方政策溯源 · 老年友好语音适配 · 永久公益免费开放</p>
         </div>
     </div>
-
     <button class="back-top" id="backTop">↑</button>
-
     <footer>
         © 2026 华东师范大学山河共富团队 乡村振兴公益项目
     </footer>
-
-    <!-- 官方Chat SDK -->
     <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.19/libs/cn/index.js"></script>
     <script>
-        // 加载进度条
         window.addEventListener('load', () => {
             const prog = document.getElementById('pageProgress');
             let w = 0;
@@ -232,8 +230,6 @@
                 if(w >= 100) clearInterval(t);
             },25);
         })
-
-        // 初始化聊天，强制内嵌容器，禁止悬浮弹窗
         window.onload = () => {
             setTimeout(() => {
                 new CozeWebSDK.WebChatClient({
@@ -249,7 +245,8 @@
                     ui: {
                         containerMode: "embed",
                         width: "100%",
-                        height: "100%"
+                        height: "100%",
+                        margin: "0 auto"
                     },
                     auth: {
                         type: "token",
@@ -260,8 +257,6 @@
                 });
             }, 1000);
         }
-
-        // 回到顶部显隐
         window.addEventListener('scroll', () => {
             const btn = document.getElementById('backTop');
             if(window.scrollY > 300) btn.classList.add('show');
@@ -270,8 +265,6 @@
         document.getElementById('backTop').addEventListener('click', ()=>{
             window.scrollTo({top:0,behavior:'smooth'});
         })
-
-        // 数字滚动动画
         const countEls = document.querySelectorAll('.count');
         const countAnim = () => {
             countEls.forEach(el => {
@@ -286,7 +279,6 @@
                 },35);
             })
         }
-        // 滚动触发计数
         const io = new IntersectionObserver(entries => {
             if(entries[0].isIntersecting){
                 countAnim();
