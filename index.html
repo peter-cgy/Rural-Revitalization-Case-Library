@@ -4,9 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>乡衡 · RISA 产业决策</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600;700&family=SF+Pro+Text:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -18,52 +15,38 @@
             width: 100%;
             background: #f2f4f0;
             overflow: hidden;
-            font-family: "SF Pro Text", -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", system-ui, sans-serif;
         }
 
-        /* ===== 全屏聊天容器 ===== */
-        #app {
+        /* ===== 加载占位 ===== */
+        #loading {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-        }
-
-        /* ===== 加载占位（聊天加载前显示） ===== */
-        .loading-screen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            inset: 0;
             z-index: 20;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             background: #f2f4f0;
-            transition: opacity 0.6s ease;
+            transition: opacity 0.5s ease;
             pointer-events: none;
         }
-        .loading-screen.hide {
+        #loading.hide {
             opacity: 0;
         }
-
-        .loading-screen .logo {
+        #loading .logo {
             font-size: 28px;
             font-weight: 700;
             color: #2e7d32;
             letter-spacing: -0.5px;
         }
-        .loading-screen .sub {
+        #loading .sub {
             font-size: 14px;
             color: #4a7a4a;
             margin-top: 4px;
             font-weight: 500;
         }
-        .loading-screen .spinner {
+        #loading .spinner {
             margin-top: 24px;
             width: 32px;
             height: 32px;
@@ -76,23 +59,52 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ===== Coze SDK 内部样式微调（覆盖默认） ===== */
-        .coze-chat-container {
+        /* ===== 聊天容器：强制全屏居中 ===== */
+        #app {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 10;
+        }
+
+        /* ===== 暴力覆盖 SDK 默认样式，消除一切偏移 ===== */
+        #app > *,
+        .coze-chat-container,
+        .coze-chat,
+        [class*="coze"] {
             width: 100% !important;
             height: 100% !important;
             max-width: 100% !important;
             max-height: 100% !important;
             border-radius: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            right: 0 !important;
+            bottom: 0 !important;
+            transform: none !important;
         }
-        .coze-chat {
+
+        /* 针对可能存在的 iframe 或 div 内部偏移 */
+        .coze-chat iframe,
+        .coze-chat div {
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
             border-radius: 0 !important;
+            margin: 0 !important;
         }
     </style>
 </head>
 <body>
 
     <!-- ===== 加载占位 ===== -->
-    <div class="loading-screen" id="loadingScreen">
+    <div id="loading">
         <div class="logo">🌾 乡衡</div>
         <div class="sub">乡村产业空间适配度指数 · RISA</div>
         <div class="spinner"></div>
@@ -107,9 +119,9 @@
 
     <script>
         (function() {
-            var loading = document.getElementById('loadingScreen');
+            var loading = document.getElementById('loading');
 
-            // 初始化 Coze SDK（嵌入模式，全屏）
+            // 初始化 Coze SDK
             setTimeout(function() {
                 try {
                     new CozeWebSDK.WebChatClient({
@@ -119,7 +131,7 @@
                         componentProps: {
                             title: "乡衡 · RISA 产业决策",
                             sub_title: "适配测算 · 政策溯源 · 公益免登",
-                            floating: false,      // 嵌入模式，不用悬浮球
+                            floating: false,      // 嵌入模式，无悬浮球
                             layout: "embed"        // 嵌入布局
                         },
                         ui: {
@@ -138,12 +150,12 @@
                         container: "#app"
                     });
 
-                    // SDK 加载完成后隐藏加载占位
+                    // 加载完成后淡出占位
                     setTimeout(function() {
                         loading.classList.add('hide');
                         setTimeout(function() {
                             loading.style.display = 'none';
-                        }, 600);
+                        }, 500);
                     }, 1200);
 
                 } catch (e) {
@@ -152,16 +164,15 @@
                 }
             }, 600);
 
-            // 兜底：8秒后无论是否加载完成都隐藏占位
+            // 兜底：8秒后强制隐藏占位
             setTimeout(function() {
                 if (!loading.classList.contains('hide')) {
                     loading.classList.add('hide');
                     setTimeout(function() {
                         loading.style.display = 'none';
-                    }, 600);
+                    }, 500);
                 }
             }, 8000);
-
         })();
     </script>
 
