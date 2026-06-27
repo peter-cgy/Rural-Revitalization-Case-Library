@@ -2,368 +2,298 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>乡衡 · RISA 公式与智能体</title>
+    <!-- 强制手机适配，禁止缩放 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>乡衡·RISA 山河共富</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@400;500;600&family=SF+Pro+Text:wght@400;500&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: "SF Pro Text", system-ui, -apple-system, sans-serif;
         }
-
+        :root {
+            --main-green: #2e7d32;
+            --light-green: #e8f5e9;
+            --gray-bg: #f5f5f7;
+            --text-dark: #1d1d1f;
+            --text-gray: #6e6e73;
+            --white: #ffffff;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f8f2;
-            color: #1d2a1a;
-            min-height: 100vh;
-            padding: 2rem 1.5rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            background-color: var(--gray-bg);
+            color: var(--text-dark);
+            overflow-x: hidden;
+            padding-bottom: 80px;
         }
-
-        .container {
-            max-width: 1000px;
+        /* 顶部加载条 */
+        .page-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: var(--main-green);
+            width: 0%;
+            z-index: 9999;
+        }
+        /* 顶部导航 移动端极简 */
+        header {
+            position: fixed;
+            top: 0;
             width: 100%;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(16px);
+            padding: 14px 16px;
+            z-index: 999;
         }
-
-        /* 标题 */
-        .header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .header h1 {
-            font-size: 2.6rem;
-            font-weight: 800;
-            letter-spacing: -0.03em;
-            line-height: 1.1;
-            color: #1d2a1a;
-        }
-
-        .header .highlight {
-            background: linear-gradient(135deg, #1d2a1a 0%, #4a9a4a 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .header .sub {
-            font-size: 1rem;
-            color: #4a6a4a;
-            margin-top: 0.3rem;
-        }
-
-        /* 公式卡片 */
-        .formula-card {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border-radius: 32px;
-            padding: 2rem 2rem 1.8rem;
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
-            margin-bottom: 2.5rem;
-        }
-
-        .formula-main {
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            padding: 0.8rem 0;
-            background: rgba(42, 122, 58, 0.04);
-            border-radius: 16px;
-            font-family: 'Inter', monospace;
-            letter-spacing: 0.5px;
-            color: #1d2a1a;
-            margin-bottom: 1.2rem;
-        }
-
-        .formula-main .green {
-            color: #2a7a3a;
-        }
-
-        .formula-sub {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        @media (max-width: 700px) {
-            .formula-sub {
-                grid-template-columns: 1fr;
-            }
-            .header h1 {
-                font-size: 2rem;
-            }
-            .formula-main {
-                font-size: 1.2rem;
-            }
-            .container {
-                padding: 0;
-            }
-        }
-
-        .formula-item {
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 16px;
-            padding: 1rem 1.2rem;
-            border: 1px solid rgba(42, 92, 42, 0.04);
-        }
-
-        .formula-item .f-name {
-            font-weight: 700;
-            font-size: 0.9rem;
-            color: #1d2a1a;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            margin-bottom: 0.2rem;
-        }
-
-        .formula-item .f-name i {
-            color: #2a7a3a;
-        }
-
-        .formula-item .f-expr {
-            font-family: 'Inter', monospace;
-            font-size: 0.9rem;
+        .header-title {
+            font-size: 17px;
             font-weight: 600;
-            color: #1d2a1a;
-            padding: 0.3rem 0.6rem;
-            background: rgba(42, 122, 58, 0.04);
-            border-radius: 8px;
-            margin: 0.2rem 0;
-            word-break: break-word;
-        }
-
-        .formula-item .f-desc {
-            font-size: 0.7rem;
-            color: #4a6a4a;
-            line-height: 1.5;
-        }
-
-        .formula-item .f-source {
-            font-size: 0.6rem;
-            color: #5a7a5a;
-            margin-top: 0.3rem;
-            padding-top: 0.3rem;
-            border-top: 1px dashed rgba(42, 92, 42, 0.08);
-        }
-
-        .weight-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 0.8rem;
-            margin-top: 1rem;
-        }
-
-        @media (max-width: 500px) {
-            .weight-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        .weight-item {
+            color: var(--main-green);
             text-align: center;
-            background: rgba(255, 255, 255, 0.4);
-            border-radius: 14px;
-            padding: 0.6rem;
         }
-
-        .weight-item .w-val {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #2a7a3a;
+        /* 主内容容器 */
+        .wrap {
+            margin-top: 70px;
+            padding: 0 16px;
         }
-
-        .weight-item .w-label {
-            font-size: 0.65rem;
-            color: #4a6a4a;
+        /* 标题区块 */
+        .title-block {
+            text-align: center;
+            margin: 30px 0;
         }
-
-        .weight-item .w-reason {
-            font-size: 0.55rem;
-            color: #8a9a8a;
-            margin-top: 0.1rem;
+        .main-title {
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 12px;
         }
-
-        /* 智能体区域 */
-        .agent-section {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(8px);
-            border-radius: 32px;
-            border: 1px solid rgba(42, 92, 42, 0.06);
+        .desc-text {
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.6;
+        }
+        /* 智能体容器：直接全屏贴合，无多余卡片边框 */
+        .chat-wrap {
+            width: 100%;
+            height: 70vh;
+            border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
+            background: var(--white);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
         }
-
-        .agent-container {
+        #app {
             width: 100%;
-            min-height: 600px;
+            height: 100%;
         }
-
-        .agent-container iframe {
-            width: 100%;
-            height: 700px;
-            border: none;
-            display: block;
-        }
-
-        .agent-placeholder {
+        .loading-tip {
+            height: 100%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 400px;
-            color: #8a9a8a;
+            color: var(--main-green);
+            font-size: 14px;
+        }
+        /* 数据统计区块 手机两行布局 */
+        .stat-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+            margin: 40px 0;
+        }
+        .stat-item {
+            background: var(--white);
+            padding: 20px 8px;
+            border-radius: 16px;
             text-align: center;
-            padding: 2rem;
         }
-
-        .agent-placeholder i {
-            font-size: 3rem;
-            opacity: 0.2;
-            margin-bottom: 1rem;
+        .stat-num {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--main-green);
+            margin-bottom: 6px;
         }
-
-        .agent-placeholder p {
-            max-width: 400px;
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-gray);
         }
-
-        .footer-note {
-            margin-top: 2rem;
+        /* 内容分段区块 */
+        .section-block {
+            margin: 50px 0;
+        }
+        .section-h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
             text-align: center;
-            font-size: 0.75rem;
-            color: #8a9a8a;
-            border-top: 1px solid rgba(42, 92, 42, 0.06);
-            padding-top: 1.5rem;
         }
-
-        .footer-note i {
-            margin-right: 4px;
+        .section-p {
+            font-size: 14px;
+            color: var(--text-gray);
+            line-height: 1.7;
+            text-align: center;
+        }
+        /* 回到顶部 */
+        .back-top {
+            position: fixed;
+            right: 16px;
+            bottom: 20px;
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: var(--main-green);
+            color: white;
+            border: none;
+            font-size: 16px;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .back-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        /* 底部版权 */
+        footer {
+            text-align: center;
+            margin-top: 60px;
+            font-size: 12px;
+            color: var(--text-gray);
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- 标题 -->
-        <div class="header">
-            <h1>乡村产业空间<br><span class="highlight">适配度指数（RISA）</span></h1>
-            <p class="sub">核心公式 · 维度定义 · AI 智能诊断</p>
+    <div class="page-progress" id="pageProgress"></div>
+
+    <header>
+        <div class="header-title">乡衡·RISA 山河共富</div>
+    </header>
+
+    <div class="wrap">
+        <div class="title-block">
+            <h1 class="main-title">公益乡村产业智能决策平台</h1>
+            <p class="desc-text">地理实景校准 + 官方政策溯源 · 基层村干部免费专用 · 免登录直接使用</p>
         </div>
 
-        <!-- 公式卡片 -->
-        <div class="formula-card">
-            <div class="formula-main">
-                RISA = <span class="green">w₁</span>·L<sub>land</sub> + <span class="green">w₂</span>·L<sub>labor</sub> + <span class="green">w₃</span>·L<sub>location</sub> + <span class="green">w₄</span>·L<sub>infra</sub>
-            </div>
-            <div style="text-align:center;font-size:0.8rem;color:#4a6a4a;margin-bottom:1rem;">
-                权重 w₁~w₄ 根据产业类型动态调整
-            </div>
-
-            <div class="formula-sub">
-                <!-- 土地 -->
-                <div class="formula-item">
-                    <div class="f-name"><i class="fas fa-seedling"></i> L<sub>land</sub> 土地适配度</div>
-                    <div class="f-expr">L<sub>land</sub> = (A<sub>suit</sub>/A<sub>total</sub> × 0.5 + P<sub>cont</sub>/P<sub>total</sub> × 0.5) × 100</div>
-                    <div class="f-desc">
-                        <strong>A<sub>suit</sub></strong> = 适宜产业用地（亩）<br>
-                        <strong>A<sub>total</sub></strong> = 全村可利用土地（亩）<br>
-                        <strong>P<sub>cont</sub></strong> = 连片地块面积（亩）<br>
-                        <strong>P<sub>total</sub></strong> = 全部地块面积（亩）
-                    </div>
-                    <div class="f-source">来源：土地适宜性评价</div>
-                </div>
-
-                <!-- 劳动力 -->
-                <div class="formula-item">
-                    <div class="f-name"><i class="fas fa-users"></i> L<sub>labor</sub> 劳动力适配度</div>
-                    <div class="f-expr">L<sub>labor</sub> = (L<sub>avail</sub>/L<sub>total</sub> × 0.5 + D<sub>15min</sub>/L<sub>total</sub> × 0.5) × 100</div>
-                    <div class="f-desc">
-                        <strong>L<sub>avail</sub></strong> = 可参与产业劳动力（人）<br>
-                        <strong>L<sub>total</sub></strong> = 全村劳动力总数（人）<br>
-                        <strong>D<sub>15min</sub></strong> = 15分钟通勤圈内劳动力（人）
-                    </div>
-                    <div class="f-source">来源：15分钟生活圈理论</div>
-                </div>
-
-                <!-- 区位 -->
-                <div class="formula-item">
-                    <div class="f-name"><i class="fas fa-map-pin"></i> L<sub>location</sub> 区位适配度</div>
-                    <div class="f-expr">L<sub>location</sub> = (M<sub>market</sub> + T<sub>transport</sub> + R<sub>resource</sub>) / 3</div>
-                    <div class="f-desc">
-                        <strong>M<sub>market</sub></strong> = max(0, 100 − 距县城公里数×2)<br>
-                        <strong>T<sub>transport</sub></strong> = 通主干道评分（&lt;1km=100, 1-3km=70, 3-5km=40, &gt;5km=10）<br>
-                        <strong>R<sub>resource</sub></strong> = 距核心资源点便利度（类比T<sub>transport</sub>）
-                    </div>
-                    <div class="f-source">来源：区位论</div>
-                </div>
-
-                <!-- 基础设施 -->
-                <div class="formula-item">
-                    <div class="f-name"><i class="fas fa-bolt"></i> L<sub>infra</sub> 基础设施适配度</div>
-                    <div class="f-expr">L<sub>infra</sub> = (I<sub>score</sub>/10 × 0.7 + D<sub>factor</sub> × 0.3) × 100</div>
-                    <div class="f-desc">
-                        <strong>I<sub>score</sub></strong> = 基础设施评分（1-10）<br>
-                        <strong>D<sub>factor</sub></strong> = max(0, 1 − 距县城公里数/50)
-                    </div>
-                    <div class="f-source">来源：区域发展条件评价</div>
-                </div>
-            </div>
-
-            <!-- 权重 -->
-            <div style="margin-top:1.5rem;">
-                <div style="font-weight:700;font-size:0.9rem;color:#1d2a1a;text-align:center;margin-bottom:0.6rem;">不同产业的权重分配</div>
-                <div class="weight-grid">
-                    <div class="weight-item">
-                        <div class="w-val">35%</div>
-                        <div class="w-label">土地</div>
-                        <div class="w-reason">循环农业需要连片土地</div>
-                    </div>
-                    <div class="weight-item">
-                        <div class="w-val">30%</div>
-                        <div class="w-label">劳动力</div>
-                        <div class="w-reason">需要充足劳动力</div>
-                    </div>
-                    <div class="weight-item">
-                        <div class="w-val">25%</div>
-                        <div class="w-label">区位</div>
-                        <div class="w-reason">影响原料与市场</div>
-                    </div>
-                    <div class="weight-item">
-                        <div class="w-val">10%</div>
-                        <div class="w-label">基础设施</div>
-                        <div class="w-reason">基础保障条件</div>
-                    </div>
-                </div>
+        <!-- 智能体主区域，简洁圆角容器，无多余3D倾斜、无冗余装饰 -->
+        <div class="chat-wrap">
+            <div id="app">
+                <div class="loading-tip">智能体加载中，请稍候</div>
             </div>
         </div>
 
-        <!-- 智能体区域 -->
-        <div class="agent-section">
-            <div class="agent-container">
-                <!-- 
-                    ============================================================
-                    请将下方 iframe 的 src 替换为您的 Coze 智能体嵌入链接
-                    发布路径：Coze 控制台 → Bot → 发布 → 网页渠道 → 复制 iframe 代码
-                    示例格式：https://www.coze.cn/embed/你的BotID?hide_logo=true
-                    ============================================================
-                -->
-                <iframe 
-                    src="https://www.coze.cn/store/agent/7655881339992424494?bot_id=true" 
-                    allow="microphone; camera; clipboard-read; clipboard-write;">
-                </iframe>
+        <div class="stat-box">
+            <div class="stat-item">
+                <div class="stat-num count" data-target="90">0</div>
+                <div class="stat-label">研判效率提升%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num count" data-target="75">0</div>
+                <div class="stat-label">数据准确率提升%</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-num count" data-target="3">0</div>
+                <div class="stat-label">落地试点村镇</div>
             </div>
         </div>
 
-        <div class="footer-note">
-            <i class="fas fa-database"></i> 基于泌阳·德阳·金寨三地实地数据验证 · 华东师大地理拔尖班
+        <div class="section-block">
+            <h3 class="section-h3">项目研发背景</h3>
+            <p class="section-p">实地走访河南、金寨、德阳村镇，针对村干部经验规划、专业软件门槛高、惠农政策获取难、老年群体使用不便痛点，自研RISA量化打分系统，配套高德地理核验、政策检索、语音朗读、PDF导出一体化服务。</p>
+        </div>
+
+        <div class="section-block">
+            <h3 class="section-h3">核心创新优势</h3>
+            <p class="section-p">地理耦合量化打分 · 政务官方政策溯源 · 老年友好语音适配 · 永久公益免费开放</p>
         </div>
     </div>
+
+    <button class="back-top" id="backTop">↑</button>
+
+    <footer>
+        © 2026 华东师范大学山河共富团队 乡村振兴公益项目
+    </footer>
+
+    <!-- 官方Chat SDK -->
+    <script src="https://lf-cdn.coze.cn/obj/unpkg/flow-platform/chat-app-sdk/1.2.0-beta.19/libs/cn/index.js"></script>
+    <script>
+        // 加载进度条
+        window.addEventListener('load', () => {
+            const prog = document.getElementById('pageProgress');
+            let w = 0;
+            const t = setInterval(() => {
+                w += 6;
+                prog.style.width = w + '%';
+                if(w >= 100) clearInterval(t);
+            },25);
+        })
+
+        // 初始化聊天，强制内嵌容器，禁止悬浮弹窗
+        window.onload = () => {
+            setTimeout(() => {
+                new CozeWebSDK.WebChatClient({
+                    config: {
+                        bot_id: "7655881339992424494"
+                    },
+                    componentProps: {
+                        title: "乡衡·RISA乡村产业决策助手",
+                        sub_title: "惠农产业适配测算系统",
+                        floating: false,
+                        layout: "embed"
+                    },
+                    ui: {
+                        containerMode: "embed",
+                        width: "100%",
+                        height: "100%"
+                    },
+                    auth: {
+                        type: "token",
+                        token: "pat_P4HBxl5ykhhLUSpQHhMA2gWNCX01JJbXwEa6nYAhuQJXZ9rGRFNN4uBPYGR75W07",
+                        onRefreshToken: () => "pat_P4HBxl5ykhhLUSpQHhMA2gWNCX01JJbXwEa6nYAhuQJXZ9rGRFNN4uBPYGR75W07"
+                    },
+                    container: "#app"
+                });
+            }, 1000);
+        }
+
+        // 回到顶部显隐
+        window.addEventListener('scroll', () => {
+            const btn = document.getElementById('backTop');
+            if(window.scrollY > 300) btn.classList.add('show');
+            else btn.classList.remove('show');
+        })
+        document.getElementById('backTop').addEventListener('click', ()=>{
+            window.scrollTo({top:0,behavior:'smooth'});
+        })
+
+        // 数字滚动动画
+        const countEls = document.querySelectorAll('.count');
+        const countAnim = () => {
+            countEls.forEach(el => {
+                const target = Number(el.dataset.target);
+                let cur = 0;
+                const timer = setInterval(() => {
+                    cur += Math.ceil(target / 25);
+                    if(cur >= target){
+                        el.textContent = target;
+                        clearInterval(timer);
+                    }else el.textContent = cur;
+                },35);
+            })
+        }
+        // 滚动触发计数
+        const io = new IntersectionObserver(entries => {
+            if(entries[0].isIntersecting){
+                countAnim();
+                io.disconnect();
+            }
+        },{threshold:0.2})
+        io.observe(document.querySelector('.stat-box'));
+    </script>
 </body>
 </html>
